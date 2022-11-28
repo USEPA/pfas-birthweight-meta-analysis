@@ -1,0 +1,179 @@
+---
+title: "PFAS Meta-Analysis"
+author: "Alexandra Larsen"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output:  
+  html_document:
+    toc: yes
+    toc_depth: 2
+    number_sections: yes
+params:
+  pfas_type: "PFNA"
+  print_code: FALSE
+---
+
+<!-- Manuscript: overall, stratified, loo; sensitivity: re-expression, Kwon (PFNA only), 2 vs 3 strata -->
+
+```{r setup, include = FALSE, root.dir = "C:/Users/alarsen/OneDrive - Environmental Protection Agency (EPA)/Projects/IRIS/PFAS/pfas-birthweight-meta-analysis"}
+knitr::opts_chunk$set(echo = params$print_code,
+                      warning = FALSE,
+                      tidy = TRUE) #tidy.opts = list(width.cutoff = 60), # if word_document
+#rmarkdown::render(output_file = paste0("Meta_Analysis_", pfas, ".pdf"))
+
+library(readxl)
+library(tidyr)
+library(tidyverse)
+library(dplyr)
+library(metafor)
+library(meta)
+library(knitr)
+library(kableExtra)
+library(ggplot2)
+library(RColorBrewer)
+library(formatR)
+source("utility_functions.R")
+
+pfas_type = "PFNA"
+
+if (pfas_type == "PFNA") {
+  betas <- read.csv("betas_pfna.csv")
+} else if (pfas_type == "PFHxS") {
+  betas <- read.csv("betas_pfhxs.csv")
+}
+attach(betas)
+```
+
+# Background
+
+The purpose of this analysis is to investigate the relationship between PFAS exposure during pregnancy and birth weight. We use meta-analytic techniques to summarize epidemiological findings from `r length(Study)` studies.
+
+# Overall Meta-Analysis
+
+We ran a random effects model to capture any between-study heterogeneity. The model employs weighted estimation with inverse-variance weights.
+
+```{r}
+rma_overall <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, slab = Study)
+print_results("Overall", rma_overall, betas) %>% kable(format = 'pandoc')
+```
+
+```{r forest_plot, dev = "png", dpi = 350, fig.width = 7, fit.height = 5}
+plot_df <- betas %>%
+  #mutate(SampleTiming = fct_recode(Sampling_3, Early = "early", Late = "late", Post = "post")) %>%
+  mutate(SampleTiming = fct_recode(Bin, `1st` = "T1", `1st-2nd` = "T1-T2", `2nd` = "T2", 
+                                   `2nd-3rd` = "T2-T3", `3rd` = "T3", `Birth` = "B", `Post-Birth` = "PB",
+                                   `Pre-Conception` = "PC"),
+         Confidence = factor(Confidence, levels = c("High", "Medium", "Low")))
+# TODO: reorder factor levels - use levels(); search in old code
+
+forest(rma_overall,
+       cex = .55,
+       level = 95,
+       digits = 1L,
+       xlim = c(-1100, 500),
+       alim = c(-200, 200),
+       order = order(plot_df$Confidence, plot_df$SampleTiming, -plot_df$Sample.Size),
+       header = "Study",
+       ilab = cbind(as.character(plot_df$Confidence),
+                    as.character(plot_df$SampleTiming),
+                    plot_df$Sample.Size),
+       ilab.xpos = c(-650, -500, -350),
+       slab = plot_df$Study,
+       xlab = NULL,
+       mlab = modify_label(rma_overall, "All Studies, RE Model"))
+
+p <- par(cex = .55, font=2)
+
+text(c(-650, -500, -350), length(Study)+2, c("Confidence", "Timing", "N"))
+```
+
+## Leave-One-Out Analyis: Assessing heterogeneity 
+
+```{r}
+loo <- leave1out(rma_overall, digits = 2) %>% 
+  as.data.frame() %>%
+  mutate_at(c(1:3, 5:11), ~round(., 2)) %>%
+  mutate_at(c(4), ~round(., 5)) %>%
+  add_column(Study, .before = "estimate")
+
+ind <- which(loo$I2 == min(loo$I2))
+```
+
+Results: dropping `r loo$Study[ind]` leads to the lowest I2, `r loo$I2[ind]`%. 
+
+```{r}
+kable(loo, format = 'pandoc')
+```
+
+## Publication Bias 
+
+```{r}
+# funnel plot code adapted from Kristen Rappazzo's "OZONE and PRETERM BIRTH META-ANALYSIS"
+regtest_out <- regtest(rma_overall, model = "rma", predictor = "sei")
+regtest_p <- round(regtest_out$pval, 4)
+```
+
+The Egger’s regression test showed no significant relationship between the observed effect sizes and their standard error (p = `r regtest_p`) indicating no evidence of funnel plot asymmetry due to publication bias.
+
+```{r funnel_plot, echo = F, include = T, dev = "png"}
+funnel(rma_overall, xlab = sprintf("Effect Estimate of ln-%s on Birth-Weight", params$pfas_type)) # label = 3)
+```
+
+# Stratified Analyses
+
+## Study Confidence
+
+```{r}
+conf <- betas[!is.na(Confidence), ] %>% 
+  mutate(Confidence2 = factor(ifelse(Confidence == "Low", "Low", "High+Medium"), levels = c("High+Medium", "Low")))
+```
+
+```{r}
+# Run meta-analysis for each study confidence subgroup using a random effects model
+rma_high <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = conf, subset = Confidence == "High")
+rma_med  <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = conf, subset = Confidence == "Medium")
+rma_low  <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = conf, subset = Confidence == "Low")
+rma_hm   <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = conf, subset = Confidence2 == "High+Medium")
+
+rma_low
+```
+
+```{r}
+# Display results
+rbind(
+  print_results("High", rma_high, conf %>% filter(Confidence == "High")),
+  print_results("Medium", rma_med, conf %>% filter(Confidence == "Medium")),
+  print_results("Low", rma_low, conf %>% filter(Confidence == "Low")),
+  print_results("High+Medium", rma_hm, conf %>% filter(Confidence2 == "High+Medium"))) %>% kable(format = "pandoc")
+```
+
+```{r}
+# Prepare data for hypothesis test of any significant differences across strata
+dat1 <- data.frame(strata = c("High", "Medium", "Low"),
+                   estimate = c(coef(rma_high), coef(rma_med), coef(rma_low)),
+                   SE = c(rma_high$se, rma_med$se, rma_low$se),
+                   tau2 = round(c(rma_high$tau2, rma_med$tau2, rma_low$tau2), 3))
+
+# Run fixed effect model with strata as moderator; rma includes omnibus test 
+#  for moderator variable, i.e., test for any differences across strata
+res1 <- rma(yi = estimate, sei = SE, mods = ~ strata, method = "FE", data = dat1)
+
+# Save p-value from hypothesis test differences across moderators
+p1 <- round(res1$QMp, 4)
+```
+
+```{r}
+# Repeat for High+Medium group
+dat2 <- data.frame(strata = c("High+Medium", "Low"),
+                   estimate = c(coef(rma_hm), coef(rma_low)),
+                   SE = c(rma_hm$se, rma_low$se),
+                   tau2 = round(c(rma_hm$tau2, rma_low$tau2), 3))
+res2 <- rma(yi = estimate, sei = SE, mods = ~ strata, method = "FE", data = dat2)
+p2 <- round(res2$QMp, 4)
+```
+
+Hypothesis test results for any significant differences across strata:
+
+* For all three levels, High, Medium and Low: p1 = `r p1`.
+* For High + Medium and Low: p2 = `r p2`.
+
+ 
