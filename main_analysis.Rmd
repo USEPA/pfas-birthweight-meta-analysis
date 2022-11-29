@@ -60,7 +60,7 @@ print_results("Overall", rma_overall, betas) %>% kable(format = 'pandoc')
 ```{r forest_plot, dev = "png", dpi = 350, fig.width = 7, fit.height = 5}
 plot_df <- betas %>%
   #mutate(SampleTiming = fct_recode(Sampling_3, Early = "early", Late = "late", Post = "post")) %>%
-  mutate(SampleTiming = fct_recode(Bin, `1st` = "T1", `1st-2nd` = "T1-T2", `2nd` = "T2", 
+  mutate(SampleTiming = fct_recode(Bin, `1st` = "T1", `1st-2nd` = "T1-T2",
                                    `2nd-3rd` = "T2-T3", `3rd` = "T3", `Birth` = "B", `Post-Birth` = "PB",
                                    `Pre-Conception` = "PC"),
          Confidence = factor(Confidence, levels = c("High", "Medium", "Low")))
@@ -111,7 +111,6 @@ kable(loo, format = 'pandoc')
 ## Publication Bias 
 
 ```{r}
-# funnel plot code adapted from Kristen Rappazzo's "OZONE and PRETERM BIRTH META-ANALYSIS"
 regtest_out <- regtest(rma_overall, model = "rma", predictor = "sei")
 regtest_p <- round(regtest_out$pval, 4)
 ```
@@ -131,52 +130,49 @@ In addition to the overall meta-analysis, the studies are also examined accordin
 In this section, the studies are examined by confidence levels - low, medium, high, or medium and high combined. Pooled effects are calculated and statistical differences across strata are considered. 
 
 ```{r}
-conf <- betas[!is.na(Confidence), ] %>% 
+# Add an confidence variable with a high and medium confidence combined
+betas <- betas %>% 
   mutate(Confidence2 = factor(ifelse(Confidence == "Low", "Low", "High+Medium"), levels = c("High+Medium", "Low")))
 ```
-
 ```{r}
 # Run meta-analysis for each study confidence subgroup using a random effects model
-rma_high <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = conf, subset = Confidence == "High")
-rma_med  <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = conf, subset = Confidence == "Medium")
-rma_low  <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = conf, subset = Confidence == "Low")
-rma_hm   <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = conf, subset = Confidence2 == "High+Medium")
+rma_high <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = betas, subset = Confidence == "High")
+rma_med  <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = betas, subset = Confidence == "Medium")
+rma_low  <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = betas, subset = Confidence == "Low")
+rma_hm   <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = betas, subset = Confidence2 == "High+Medium")
 ```
-
 ```{r}
 # Display results
 rbind(
-  print_results("High", rma_high, conf %>% filter(Confidence == "High")),
-  print_results("Medium", rma_med, conf %>% filter(Confidence == "Medium")),
-  print_results("Low", rma_low, conf %>% filter(Confidence == "Low")),
-  print_results("High+Medium", rma_hm, conf %>% filter(Confidence2 == "High+Medium"))) %>% kable(format = "pandoc")
+  print_results("High", rma_high, betas %>% filter(Confidence == "High")),
+  print_results("Medium", rma_med, betas %>% filter(Confidence == "Medium")),
+  print_results("Low", rma_low, betas %>% filter(Confidence == "Low")),
+  print_results("High+Medium", rma_hm, betas %>% filter(Confidence2 == "High+Medium"))) %>% kable(format = "pandoc")
 ```
-
 ```{r}
 # Prepare data for hypothesis test of any significant differences across strata
-dat1 <- data.frame(strata = c("High", "Medium", "Low"),
-                   estimate = c(coef(rma_high), coef(rma_med), coef(rma_low)),
-                   SE = c(rma_high$se, rma_med$se, rma_low$se),
-                   tau2 = round(c(rma_high$tau2, rma_med$tau2, rma_low$tau2), 3))
+confidence_results <- data.frame(strata = c("High", "Medium", "Low"),
+                                 estimate = c(coef(rma_high), coef(rma_med), coef(rma_low)),
+                                 SE = c(rma_high$se, rma_med$se, rma_low$se),
+                                 tau2 = round(c(rma_high$tau2, rma_med$tau2, rma_low$tau2), 3))
 
 # Run fixed effect model with strata as moderator
-res1 <- rma(yi = estimate, sei = SE, mods = ~ strata, method = "FE", data = dat1)
+rma_confidence <- rma(yi = estimate, sei = SE, mods = ~ strata, method = "FE", data = confidence_results)
 
-# Save p-value from hypothesis test differences across moderators (rma() runs an omnibus test for moderator variable, i.e., test for any differences across strata)
-p1 <- round(res1$QMp, 4)
+# Save p-value from hypothesis test differences across moderators (rma() runs an omnibus test for moderator variable, i.e., test for any differences across moderator levels, i.e., strata)
+p1 <- round(rma_confidence$QMp, 4)
 ```
-
 ```{r}
 # Repeat for High+Medium group
-dat2 <- data.frame(strata = c("High+Medium", "Low"),
-                   estimate = c(coef(rma_hm), coef(rma_low)),
-                   SE = c(rma_hm$se, rma_low$se),
-                   tau2 = round(c(rma_hm$tau2, rma_low$tau2), 3))
-res2 <- rma(yi = estimate, sei = SE, mods = ~ strata, method = "FE", data = dat2)
-p2 <- round(res2$QMp, 4)
+confidence2_results <- data.frame(strata = c("High+Medium", "Low"),
+                                  estimate = c(coef(rma_hm), coef(rma_low)),
+                                  SE = c(rma_hm$se, rma_low$se),
+                                  tau2 = round(c(rma_hm$tau2, rma_low$tau2), 3))
+rma_confidence2 <- rma(yi = estimate, sei = SE, mods = ~ strata, method = "FE", data = confidence2_results)
+p2 <- round(rma_confidence2$QMp, 4)
 ```
 
-Hypothesis test results for any significant differences across strata:
+Results from the hypothesis test results for any significant differences across strata:
 
 * For all three levels, High, Medium and Low: p = `r p1`.
 * For High + Medium and Low: p = `r p2`.
@@ -192,10 +188,9 @@ In this approach, the strata have the following definitions:
 Pooled effects are calculated and statistical differences across strata are considered. 
 
 ```{r echo = F, warning = F}
-rma_early <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, mods = ~ Sampling_3, data = betas, subset = Sampling_3 == "early")
-rma_late <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, mods = ~ Sampling_3, data = betas, subset = Sampling_3 == "late")
-rma_post <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, mods = ~ Sampling_3, data = betas, subset = Sampling_3 == "post")
-# TODO: why does there need to be a mods statement?
+rma_early <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = betas, subset = Sampling_3 == "early")
+rma_late <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = betas, subset = Sampling_3 == "late")
+rma_post <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = betas, subset = Sampling_3 == "post")
 ```
 ```{r echo = F, include = T}
 rbind(
@@ -206,20 +201,76 @@ rbind(
 ```{r echo = F, echo = F, include = F}
 sampling_results <- data.frame(estimate = c(coef(rma_early), coef(rma_late), coef(rma_post)),
                                SE = c(rma_early$se, rma_late$se, rma_post$se),
-                               strata = c("T1-T.5", "T2-3", "B-PB"),
+                               strata = c("Early", "Late", "Post"),
                                tau2 = round(c(rma_early$tau2, rma_late$tau2, rma_post$tau2), 3))
 rma_sampling <- rma(estimate, sei = SE, mods = ~ strata, method = "FE", data = sampling_results)
 p <- round(rma_sampling$QMp, 4)
 ```
 
-Hypothesis test for any differences across strata: p = `r p`.
+Results from the hypothesis test for any differences across strata: p = `r p`.
 
-# Sensitivity Testing
+# Meta-Regression
 
-## Re-expression to Natural Scale
+To further examine the impact of sampling on the relationship between `r pfas_type` and birth weight, a continuous approach for the analysis of sample timing is employed. A meta-regression on a measure of centrality of sample timing is carried out and a pooled effect is presented. Measures of centrality include mean, median and midpoint.
+
+```{r echo = F, warning = F, include = T}
+rma_ga <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, mods = ~ GA, data = betas)
+```
+
+The results estimate that the effect of `r pfas_type` on birth weight changes by `r round(coef(rma_ga)["GA"], 4)` g per unit increase in mean/median/midpoint gestational age at sample timing.
+
+# Sensitivity Analyses
 
 ## Two-Strata Approach for the Analysis of Sample Timing
 
-## Continuous Approach for the ANalysis of Sample TIming
+In this section, the three-strata approach is compared to a two-strata approach, wherein the "late" and "post" strata are collapsed into a single "late+post" strata. Pooled effects are calculated and statistical differences across strata are considered.  
+
+```{r}
+rma_lp <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = betas, subset = Sampling_2 == "late")
+```
+```{r}
+print_results("Late+Post", rma_lp, betas %>% filter(Sampling_2 == "late")) %>% kable(format = 'pandoc')
+```
+```{r echo = F, echo = F, include = F}
+sampling2_results <- data.frame(estimate = c(coef(rma_early), coef(rma_lp)),
+                               SE = c(rma_early$se, rma_lp$se),
+                               strata = c("Early", "Late+Post"),
+                               tau2 = round(c(rma_early$tau2, rma_lp$tau2), 3))
+rma_sampling2 <- rma(estimate, sei = SE, mods = ~ strata, method = "FE", data = sampling2_results)
+p <- round(rma_sampling2$QMp, 4)
+```
+
+Results from the hypothesis test for any differences between "early" and "late+post" strata: p = `r p`.
+
+## Re-expression to Natural Scale
+
+In this section, each model is re-run using data re-expressed to the natural scale as a sensitivity test to the findings on the log-scale.
+
+```{r}
+rma_overall_nat <- rma(yi = BetaNgml, sei = BetaNgmlSE)
+rma_high_nat    <- rma(yi = BetaNgml, sei = BetaNgmlSE, data = betas, subset = Confidence == "High")
+rma_med_nat     <- rma(yi = BetaNgml, sei = BetaNgmlSE, data = betas, subset = Confidence == "Medium")
+rma_low_nat     <- rma(yi = BetaNgml, sei = BetaNgmlSE, data = betas, subset = Confidence == "Low")
+rma_hm_nat      <- rma(yi = BetaNgml, sei = BetaNgmlSE, data = betas, subset = Confidence2 == "High+Medium")
+rma_early_nat   <- rma(yi = BetaNgml, sei = BetaNgmlSE, data = betas, subset = Sampling_3 == "early")
+rma_late_nat    <- rma(yi = BetaNgml, sei = BetaNgmlSE, data = betas, subset = Sampling_3 == "late")
+rma_post_nat    <- rma(yi = BetaNgml, sei = BetaNgmlSE, data = betas, subset = Sampling_3 == "post")
+rma_lp_nat      <- rma(yi = BetaNgml, sei = BetaNgmlSE, data = betas, subset = Sampling_2 == "late")
+```
+```{r}
+nat_results <- rbind(
+  print_results("Overall", rma_overall_nat, betas),
+  print_results("High", rma_high_nat, betas %>% filter(Confidence == "High")),
+  print_results("Medium", rma_med_nat, betas %>% filter(Confidence == "Medium")),
+  print_results("Low", rma_low_nat, betas %>% filter(Confidence == "Low")),
+  print_results("High+Medium", rma_hm_nat, betas %>% filter(Confidence2 == "High+Medium")),
+  print_results("Early", rma_early_nat, betas %>% filter(Sampling_3 == "early")),
+  print_results("Late", rma_late_nat, betas %>% filter(Sampling_3 == "late")),
+  print_results("Post", rma_post_nat, betas %>% filter(Sampling_3 == "post")),
+  print_results("Late+Post", rma_lp_nat, betas %>% filter(Sampling_2 == "late"))
+)
+nat_results %>% kable(format = 'pandoc')
+```
+
 
  

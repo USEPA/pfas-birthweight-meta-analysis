@@ -428,10 +428,10 @@ summary {
 <li><a href="#study-confidence"><span class="toc-section-number">3.1</span> Study Confidence</a></li>
 <li><a href="#sample-timing"><span class="toc-section-number">3.2</span> Sample Timing</a></li>
 </ul></li>
-<li><a href="#sensitivity-testing"><span class="toc-section-number">4</span> Sensitivity Testing</a><ul>
-<li><a href="#re-expression-to-natural-scale"><span class="toc-section-number">4.1</span> Re-expression to Natural Scale</a></li>
-<li><a href="#two-strata-approach-for-the-analysis-of-sample-timing"><span class="toc-section-number">4.2</span> Two-Strata Approach for the Analysis of Sample Timing</a></li>
-<li><a href="#continuous-approach-for-the-analysis-of-sample-timing"><span class="toc-section-number">4.3</span> Continuous Approach for the ANalysis of Sample TIming</a></li>
+<li><a href="#meta-regression"><span class="toc-section-number">4</span> Meta-Regression</a></li>
+<li><a href="#sensitivity-analyses"><span class="toc-section-number">5</span> Sensitivity Analyses</a><ul>
+<li><a href="#two-strata-approach-for-the-analysis-of-sample-timing"><span class="toc-section-number">5.1</span> Two-Strata Approach for the Analysis of Sample Timing</a></li>
+<li><a href="#re-expression-to-natural-scale"><span class="toc-section-number">5.2</span> Re-expression to Natural Scale</a></li>
 </ul></li>
 </ul>
 </div>
@@ -951,7 +951,7 @@ summary {
 </tr>
 </tbody>
 </table>
-<p>Hypothesis test results for any significant differences across strata:</p>
+<p>Results from the hypothesis test results for any significant differences across strata:</p>
 <ul>
 <li>For all three levels, High, Medium and Low: p = 0.7678.</li>
 <li>For High + Medium and Low: p = 0.8751.</li>
@@ -1016,19 +1016,168 @@ summary {
 </tr>
 </tbody>
 </table>
-<p>Hypothesis test for any differences across strata: p = 0.1469.</p>
+<p>Results from the hypothesis test for any differences across strata: p = 0.1469.</p>
 </div>
 </div>
-<div id="sensitivity-testing" class="section level1">
-<h1><span class="header-section-number">4</span> Sensitivity Testing</h1>
-<div id="re-expression-to-natural-scale" class="section level2">
-<h2><span class="header-section-number">4.1</span> Re-expression to Natural Scale</h2>
+<div id="meta-regression" class="section level1">
+<h1><span class="header-section-number">4</span> Meta-Regression</h1>
+<p>To further examine the impact of sampling on the relationship between PFNA and birth weight, a continuous approach for the analysis of sample timing is employed. A meta-regression on a measure of centrality of sample timing is carried out and a pooled effect is presented. Measures of centrality include mean, median and midpoint.</p>
+<p>The results estimate that the effect of PFNA on birth weight changes by -0.8552 g per unit increase in mean/median/midpoint gestational age at sample timing.</p>
 </div>
+<div id="sensitivity-analyses" class="section level1">
+<h1><span class="header-section-number">5</span> Sensitivity Analyses</h1>
 <div id="two-strata-approach-for-the-analysis-of-sample-timing" class="section level2">
-<h2><span class="header-section-number">4.2</span> Two-Strata Approach for the Analysis of Sample Timing</h2>
+<h2><span class="header-section-number">5.1</span> Two-Strata Approach for the Analysis of Sample Timing</h2>
+<p>In this section, the three-strata approach is compared to a two-strata approach, wherein the “late” and “post” strata are collapsed into a single “late+post” strata. Pooled effects are calculated and statistical differences across strata are considered.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Model</th>
+<th align="right">N</th>
+<th align="right">Estimate</th>
+<th align="right">SE</th>
+<th align="right">LCL</th>
+<th align="right">UCL</th>
+<th align="right">PVal</th>
+<th align="right">I2</th>
+<th align="right">Q_PVal</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Late+Post</td>
+<td align="right">16</td>
+<td align="right">-44.5</td>
+<td align="right">10.9</td>
+<td align="right">-65.9</td>
+<td align="right">-23</td>
+<td align="right">0</td>
+<td align="right">40.02</td>
+<td align="right">0.05</td>
+</tr>
+</tbody>
+</table>
+<p>Results from the hypothesis test for any differences between “early” and “late+post” strata: p = 0.1217.</p>
 </div>
-<div id="continuous-approach-for-the-analysis-of-sample-timing" class="section level2">
-<h2><span class="header-section-number">4.3</span> Continuous Approach for the ANalysis of Sample TIming</h2>
+<div id="re-expression-to-natural-scale" class="section level2">
+<h2><span class="header-section-number">5.2</span> Re-expression to Natural Scale</h2>
+<p>In this section, each model is re-run using data re-expressed to the natural scale as a sensitivity test to the findings on the log-scale.</p>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Model</th>
+<th align="right">N</th>
+<th align="right">Estimate</th>
+<th align="right">SE</th>
+<th align="right">LCL</th>
+<th align="right">UCL</th>
+<th align="right">PVal</th>
+<th align="right">I2</th>
+<th align="right">Q_PVal</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Overall</td>
+<td align="right">27</td>
+<td align="right">-36.3</td>
+<td align="right">10.1</td>
+<td align="right">-56.1</td>
+<td align="right">-16.5</td>
+<td align="right">0.00</td>
+<td align="right">51.13</td>
+<td align="right">0.00</td>
+</tr>
+<tr class="even">
+<td align="left">High</td>
+<td align="right">12</td>
+<td align="right">-37.7</td>
+<td align="right">15.9</td>
+<td align="right">-69.0</td>
+<td align="right">-6.5</td>
+<td align="right">0.02</td>
+<td align="right">44.04</td>
+<td align="right">0.04</td>
+</tr>
+<tr class="odd">
+<td align="left">Medium</td>
+<td align="right">10</td>
+<td align="right">-35.2</td>
+<td align="right">13.8</td>
+<td align="right">-62.3</td>
+<td align="right">-8.1</td>
+<td align="right">0.01</td>
+<td align="right">61.14</td>
+<td align="right">0.00</td>
+</tr>
+<tr class="even">
+<td align="left">Low</td>
+<td align="right">5</td>
+<td align="right">-161.9</td>
+<td align="right">139.8</td>
+<td align="right">-436.0</td>
+<td align="right">112.2</td>
+<td align="right">0.25</td>
+<td align="right">0.00</td>
+<td align="right">0.49</td>
+</tr>
+<tr class="odd">
+<td align="left">High+Medium</td>
+<td align="right">22</td>
+<td align="right">-35.4</td>
+<td align="right">10.0</td>
+<td align="right">-55.1</td>
+<td align="right">-15.8</td>
+<td align="right">0.00</td>
+<td align="right">54.62</td>
+<td align="right">0.00</td>
+</tr>
+<tr class="even">
+<td align="left">Early</td>
+<td align="right">11</td>
+<td align="right">-26.0</td>
+<td align="right">12.5</td>
+<td align="right">-50.6</td>
+<td align="right">-1.5</td>
+<td align="right">0.04</td>
+<td align="right">29.85</td>
+<td align="right">0.13</td>
+</tr>
+<tr class="odd">
+<td align="left">Late</td>
+<td align="right">10</td>
+<td align="right">-46.2</td>
+<td align="right">12.7</td>
+<td align="right">-71.2</td>
+<td align="right">-21.3</td>
+<td align="right">0.00</td>
+<td align="right">7.60</td>
+<td align="right">0.26</td>
+</tr>
+<tr class="even">
+<td align="left">Post</td>
+<td align="right">6</td>
+<td align="right">-186.3</td>
+<td align="right">95.4</td>
+<td align="right">-373.2</td>
+<td align="right">0.6</td>
+<td align="right">0.05</td>
+<td align="right">66.25</td>
+<td align="right">0.00</td>
+</tr>
+<tr class="odd">
+<td align="left">Late+Post</td>
+<td align="right">16</td>
+<td align="right">-70.5</td>
+<td align="right">22.7</td>
+<td align="right">-115.0</td>
+<td align="right">-26.1</td>
+<td align="right">0.00</td>
+<td align="right">78.70</td>
+<td align="right">0.00</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 
