@@ -162,8 +162,7 @@ dat1 <- data.frame(strata = c("High", "Medium", "Low"),
 # Run fixed effect model with strata as moderator
 res1 <- rma(yi = estimate, sei = SE, mods = ~ strata, method = "FE", data = dat1)
 
-# Save p-value from hypothesis test differences across moderators (rma() runs 
-# an omnibus test for moderator variable, i.e., test for any differences across strata)
+# Save p-value from hypothesis test differences across moderators (rma() runs an omnibus test for moderator variable, i.e., test for any differences across strata)
 p1 <- round(res1$QMp, 4)
 ```
 
@@ -189,6 +188,8 @@ In this approach, the strata have the following definitions:
 * Early: first trimester only, mixture of first and second trimester.
 * Late: second trimester only, mixture of second and third trimester, third trimester only.
 * Post: at or after birth.
+
+Pooled effects are calculated and statistical differences across strata are considered. 
 
 ```{r echo = F, warning = F}
 rma_early <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, mods = ~ Sampling_3, data = betas, subset = Sampling_3 == "early")
