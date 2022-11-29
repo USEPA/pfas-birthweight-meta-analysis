@@ -13,6 +13,7 @@ params:
 ---
 
 <!-- Manuscript: overall, stratified, loo; sensitivity: re-expression, Kwon (PFNA only), 2 vs 3 strata -->
+<!-- TODO: link main.Rmd to README.md -->
 
 ```{r setup, include = FALSE, root.dir = "C:/Users/alarsen/OneDrive - Environmental Protection Agency (EPA)/Projects/IRIS/PFAS/pfas-birthweight-meta-analysis"}
 knitr::opts_chunk$set(echo = params$print_code,
@@ -98,7 +99,10 @@ loo <- leave1out(rma_overall, digits = 2) %>%
 ind <- which(loo$I2 == min(loo$I2))
 ```
 
-Results indicate that dropping `r loo$Study[ind]` leads to the lowest I2, `r loo$I2[ind]`%. However, the difference between this and the overall $I^2$  is negligible; so we proceed with `r loo$Study[ind]` included. 
+Results indicate that dropping `r loo$Study[ind]` leads to the lowest I2, `r loo$I2[ind]`%. 
+
+<!-- However, the difference between this and the overall $I^2$  is negligible; so we proceed with `r loo$Study[ind]` included. -->
+<!-- Sensitivity tests to including Chen are carried out within the medium confidence strata. -->
 
 ```{r}
 kable(loo, format = 'pandoc')
@@ -124,7 +128,7 @@ In addition to the overall meta-analysis, the studies are also examined accordin
 
 ## Study Confidence
 
-In this section, the studies are examined by confidence levels -, low, medium, high, or medium and high combined. Pooled effects are calculated and statistical differences across strata are considered. 
+In this section, the studies are examined by confidence levels - low, medium, high, or medium and high combined. Pooled effects are calculated and statistical differences across strata are considered. 
 
 ```{r}
 conf <- betas[!is.na(Confidence), ] %>% 
@@ -155,11 +159,11 @@ dat1 <- data.frame(strata = c("High", "Medium", "Low"),
                    SE = c(rma_high$se, rma_med$se, rma_low$se),
                    tau2 = round(c(rma_high$tau2, rma_med$tau2, rma_low$tau2), 3))
 
-# Run fixed effect model with strata as moderator; rma() runs an omnibus test 
-#  for moderator variable, i.e., test for any differences across strata
+# Run fixed effect model with strata as moderator
 res1 <- rma(yi = estimate, sei = SE, mods = ~ strata, method = "FE", data = dat1)
 
-# Save p-value from hypothesis test differences across moderators
+# Save p-value from hypothesis test differences across moderators (rma() runs 
+# an omnibus test for moderator variable, i.e., test for any differences across strata)
 p1 <- round(res1$QMp, 4)
 ```
 
@@ -177,5 +181,44 @@ Hypothesis test results for any significant differences across strata:
 
 * For all three levels, High, Medium and Low: p = `r p1`.
 * For High + Medium and Low: p = `r p2`.
+
+## Sample Timing
+
+In this approach, the strata have the following definitions:
+
+* Early: first trimester only, mixture of first and second trimester.
+* Late: second trimester only, mixture of second and third trimester, third trimester only.
+* Post: at or after birth.
+
+```{r echo = F, warning = F}
+rma_early <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, mods = ~ Sampling_3, data = betas, subset = Sampling_3 == "early")
+rma_late <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, mods = ~ Sampling_3, data = betas, subset = Sampling_3 == "late")
+rma_post <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, mods = ~ Sampling_3, data = betas, subset = Sampling_3 == "post")
+# TODO: why does there need to be a mods statement?
+```
+```{r echo = F, include = T}
+rbind(
+  print_results("Early", rma_early, betas %>% filter(Sampling_3 == "early")),
+  print_results("Late", rma_late, betas %>% filter(Sampling_3 == "late")),
+  print_results("Post", rma_post, betas %>% filter(Sampling_3 == "post"))) %>% kable(format = "pandoc")
+```
+```{r echo = F, echo = F, include = F}
+sampling_results <- data.frame(estimate = c(coef(rma_early), coef(rma_late), coef(rma_post)),
+                               SE = c(rma_early$se, rma_late$se, rma_post$se),
+                               strata = c("T1-T.5", "T2-3", "B-PB"),
+                               tau2 = round(c(rma_early$tau2, rma_late$tau2, rma_post$tau2), 3))
+rma_sampling <- rma(estimate, sei = SE, mods = ~ strata, method = "FE", data = sampling_results)
+p <- round(rma_sampling$QMp, 4)
+```
+
+Hypothesis test for any differences across strata: p = `r p`.
+
+# Sensitivity Testing
+
+## Re-expression to Natural Scale
+
+## Two-Strata Approach for the Analysis of Sample Timing
+
+## Continuous Approach for the ANalysis of Sample TIming
 
  
