@@ -12,8 +12,9 @@ params:
   print_code: FALSE
 ---
 
-<!-- Manuscript: overall, stratified, loo; sensitivity: re-expression, Kwon (PFNA only), 2 vs 3 strata -->
+<!-- Manuscript: overall, stratified, loo; sensitivity: re-expression, Kwon (PFNA only), 2 vs 3 strata, loo -->
 <!-- TODO: link main.Rmd to README.md -->
+<!-- TODO: hard code some sanity checks, like the number of papers in each group -->
 
 ```{r setup, include = FALSE, root.dir = "C:/Users/alarsen/OneDrive - Environmental Protection Agency (EPA)/Projects/IRIS/PFAS/pfas-birthweight-meta-analysis"}
 knitr::opts_chunk$set(echo = params$print_code,
@@ -99,14 +100,12 @@ loo <- leave1out(rma_overall, digits = 2) %>%
 ind <- which(loo$I2 == min(loo$I2))
 ```
 
-Results indicate that dropping `r loo$Study[ind]` leads to the lowest I2, `r loo$I2[ind]`%. 
-
-<!-- However, the difference between this and the overall $I^2$  is negligible; so we proceed with `r loo$Study[ind]` included. -->
-<!-- Sensitivity tests to including Chen are carried out within the medium confidence strata. -->
+Results indicate that dropping `r loo$Study[ind]` leads to the lowest I2, `r loo$I2[ind]`%. Sensitivity analysis pertaining to dropping `r loo$Study[ind]` are carried out in the sections below.
 
 ```{r}
 kable(loo, format = 'pandoc')
 ```
+
 
 ## Publication Bias 
 
@@ -221,6 +220,24 @@ The results estimate that the effect of `r pfas_type` on birth weight changes by
 
 # Sensitivity Analyses
 
+## Leave-One-Out Sensitivity Analysis
+
+```{r}
+study_nm <- loo$Study[ind]
+study_confidence <- Confidence[Study == study_nm]
+study_sampling <- Sampling_3[Study == study_nm]
+
+rma_loo <- list(overall = rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = betas %>% filter(Study != study_nm)),
+                confidence = rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = betas %>% filter(Study != study_nm), subset = Confidence == study_confidence),
+                sampling = rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = betas %>% filter(Study != study_nm), subset = Sampling_3 == study_sampling))
+
+rbind(
+  print_results("Overall", rma_loo[[1]], betas %>% filter(Study != study_nm)),
+  print_results(study_confidence, rma_loo[[2]], betas %>% filter(Study != study_nm) %>% filter(Confidence == study_confidence)),
+  print_results(study_sampling, rma_loo[[3]], betas %>% filter(Study != study_nm) %>% filter(Sampling_3 == study_sampling))
+)
+```
+
 ## Two-Strata Approach for the Analysis of Sample Timing
 
 In this section, the three-strata approach is compared to a two-strata approach, wherein the "late" and "post" strata are collapsed into a single "late+post" strata. Pooled effects are calculated and statistical differences across strata are considered.  
@@ -272,5 +289,8 @@ nat_results <- rbind(
 nat_results %>% kable(format = 'pandoc')
 ```
 
+# Chemical-Specific Sensitivity Analyses
+
+This section includes sensitivity analyses appropriate for the collection of `r pfas_type` studies only. 
 
  
