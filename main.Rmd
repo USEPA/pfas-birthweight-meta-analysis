@@ -45,11 +45,11 @@ attach(betas)
 
 # Background
 
-The purpose of this analysis is to investigate the relationship between PFAS exposure during pregnancy and birth weight. We use meta-analytic techniques to summarize epidemiological findings from `r length(Study)` studies.
+The purpose of this analysis is to investigate the relationship between PFAS exposure during pregnancy and birth weight. Meta-analytic techniques were used to summarize epidemiological findings from `r length(Study)` studies.
 
 # Overall Meta-Analysis
 
-We ran a random effects model to capture any between-study heterogeneity. The model employs weighted estimation with inverse-variance weights.
+A random effects model was used to estimate the pooled effect of `r pfas_type` exposure on birth weight, capturing any between-study heterogeneity. The model employs weighted estimation with inverse-variance weights.
 
 ```{r}
 rma_overall <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, slab = Study)
@@ -98,7 +98,7 @@ loo <- leave1out(rma_overall, digits = 2) %>%
 ind <- which(loo$I2 == min(loo$I2))
 ```
 
-Results: dropping `r loo$Study[ind]` leads to the lowest I2, `r loo$I2[ind]`%. 
+Results indicate that dropping `r loo$Study[ind]` leads to the lowest I2, `r loo$I2[ind]`%. However, the difference between this and the overall $I^2$  is negligible; so we proceed with `r loo$Study[ind]` included. 
 
 ```{r}
 kable(loo, format = 'pandoc')
@@ -112,7 +112,7 @@ regtest_out <- regtest(rma_overall, model = "rma", predictor = "sei")
 regtest_p <- round(regtest_out$pval, 4)
 ```
 
-The Egger’s regression test showed no significant relationship between the observed effect sizes and their standard error (p = `r regtest_p`) indicating no evidence of funnel plot asymmetry due to publication bias.
+The Egger’s regression test did not detect a statistically significant relationship between the observed effect sizes and their standard errors (p = `r regtest_p`), indicating no evidence of funnel plot asymmetry due to publication bias. The funnel plot is displayed below.
 
 ```{r funnel_plot, echo = F, include = T, dev = "png"}
 funnel(rma_overall, xlab = sprintf("Effect Estimate of ln-%s on Birth-Weight", params$pfas_type)) # label = 3)
@@ -120,7 +120,11 @@ funnel(rma_overall, xlab = sprintf("Effect Estimate of ln-%s on Birth-Weight", p
 
 # Stratified Analyses
 
+In addition to the overall meta-analysis, the studies are also examined according to the following stratification: study confidence, sample timing. 
+
 ## Study Confidence
+
+In this section, the studies are examined by confidence levels -, low, medium, high, or medium and high combined. Pooled effects are calculated and statistical differences across strata are considered. 
 
 ```{r}
 conf <- betas[!is.na(Confidence), ] %>% 
@@ -133,8 +137,6 @@ rma_high <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = conf, subset = Confi
 rma_med  <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = conf, subset = Confidence == "Medium")
 rma_low  <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = conf, subset = Confidence == "Low")
 rma_hm   <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = conf, subset = Confidence2 == "High+Medium")
-
-rma_low
 ```
 
 ```{r}
@@ -153,7 +155,7 @@ dat1 <- data.frame(strata = c("High", "Medium", "Low"),
                    SE = c(rma_high$se, rma_med$se, rma_low$se),
                    tau2 = round(c(rma_high$tau2, rma_med$tau2, rma_low$tau2), 3))
 
-# Run fixed effect model with strata as moderator; rma includes omnibus test 
+# Run fixed effect model with strata as moderator; rma() runs an omnibus test 
 #  for moderator variable, i.e., test for any differences across strata
 res1 <- rma(yi = estimate, sei = SE, mods = ~ strata, method = "FE", data = dat1)
 
@@ -173,7 +175,7 @@ p2 <- round(res2$QMp, 4)
 
 Hypothesis test results for any significant differences across strata:
 
-* For all three levels, High, Medium and Low: p1 = `r p1`.
-* For High + Medium and Low: p2 = `r p2`.
+* For all three levels, High, Medium and Low: p = `r p1`.
+* For High + Medium and Low: p = `r p2`.
 
  
