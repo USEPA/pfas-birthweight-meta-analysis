@@ -442,6 +442,7 @@ summary {
 <!-- TODO: link main.Rmd to README.md -->
 <!-- TODO: hard code some sanity checks, like the number of papers in each group -->
 <!-- TODO: make sure when updating supp table, to note which info comes from email communications -->
+<!-- TODO: consider adding comparison numbers to the SA so you don't have to look thru the doc -->
 <div id="background" class="section level1">
 <h1><span class="header-section-number">1</span> Background</h1>
 <p>The purpose of this analysis is to investigate the relationship between PFAS exposure during pregnancy and birth weight. Meta-analytic techniques were used to summarize epidemiological findings from 27 studies.</p>
@@ -1237,7 +1238,34 @@ summary {
 <div id="additional-sensitivity-analyses" class="section level2">
 <h2><span class="header-section-number">5.4</span> Additional Sensitivity Analyses</h2>
 <p>For PFNA, sensitivity testing was required regarding the study, Kwon, 2016, which did not report the log base of their estimates. Firstly, the medium confidence strata is examined for sensitively to including Kwon. Estimates are provided below.</p>
-<pre><code>## NULL</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th align="left">Model</th>
+<th align="right">N</th>
+<th align="right">Estimate</th>
+<th align="right">SE</th>
+<th align="right">LCL</th>
+<th align="right">UCL</th>
+<th align="right">PVal</th>
+<th align="right">I2</th>
+<th align="right">Q_PVal</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Medium w/o Kwon, 2016</td>
+<td align="right">9</td>
+<td align="right">-34.6</td>
+<td align="right">11.8</td>
+<td align="right">-57.8</td>
+<td align="right">-11.5</td>
+<td align="right">0</td>
+<td align="right">45.92</td>
+<td align="right">0.04</td>
+</tr>
+</tbody>
+</table>
 <p>Additionally, sensitivity was explored with regards to different log bases of the Kwon, 2016 study. Estimates are provided below.</p>
 <table>
 <thead>

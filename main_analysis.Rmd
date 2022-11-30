@@ -96,7 +96,6 @@ loo <- leave1out(rma_overall, digits = 2) %>%
   mutate_at(c(1:3, 5:11), ~round(., 2)) %>%
   mutate_at(c(4), ~round(., 5)) %>%
   add_column(Study, .before = "estimate")
-
 ind <- which(loo$I2 == min(loo$I2))
 ```
 
@@ -296,9 +295,18 @@ For PFNA, sensitivity testing was required regarding the study, Kwon, 2016, whic
 
 ```{r}
 if (pfas_type == "PFNA") {
-  # TODO rma with data subset to medium strata, Kwon dropped.
+  betas_kwon <- read.csv("betas_pfna_kwon_options.csv")
+  rma_kwon <- list(log_e = rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = betas_kwon %>% filter(!(Study == "Kwon, 2016" & BetaUnit != "g/ln(ng/ml)"))),
+                   log_2 = rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = betas_kwon %>% filter(!(Study == "Kwon, 2016" & BetaUnit != "g/log2(ng/ml)"))),
+                   log_10 = rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = betas_kwon %>% filter(!(Study == "Kwon, 2016" & BetaUnit != "g/log10(ng/ml)"))),
+                   medium = rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = betas %>% filter(Confidence == Confidence[Study == "Kwon, 2016"]) %>% filter(!(Study == "Kwon, 2016"))))
+}
+```
+```{r}
+if (pfas_type == "PFNA") {
+  print_results("Medium w/o Kwon, 2016", rma_kwon[[4]], betas %>% filter(Confidence == Confidence[Study == "Kwon, 2016"]) %>% filter(!(Study == "Kwon, 2016"))) %>% kable(format = 'pandoc')
 } else {
-  print("PFNA is not the chemical of interest; this analysis is irrelevant to PFNA_TYPE.")
+  print(sprintf("PFNA is not the chemical of interest; this analysis is not needed for %s.", pfas_type))
 }
 ```
 
@@ -306,17 +314,13 @@ Additionally, sensitivity was explored with regards to different log bases of th
 
 ```{r}
 if (pfas_type == "PFNA") {
-  betas_kwon <- read.csv("betas_pfna_kwon_options.csv")
-  rma_kwon <- list(log_e = rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = betas_kwon %>% filter(!(Study == "Kwon, 2016" & BetaUnit != "g/ln(ng/ml)"))),
-                 log_2 = rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = betas_kwon %>% filter(!(Study == "Kwon, 2016" & BetaUnit != "g/log2(ng/ml)"))),
-                 log_10 = rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = betas_kwon %>% filter(!(Study == "Kwon, 2016" & BetaUnit != "g/log10(ng/ml)"))))
   rbind(
     print_results("log_e", rma_kwon[[1]], betas_kwon %>% filter(!(Study == "Kwon, 2016" & BetaUnit != "g/ln(ng/ml)"))),
     print_results("log_2", rma_loo[[2]], betas_kwon %>% filter(!(Study == "Kwon, 2016" & BetaUnit != "g/log2(ng/ml)"))),
     print_results("log_10", rma_loo[[3]], betas_kwon %>% filter(!(Study == "Kwon, 2016" & BetaUnit != "g/log10(ng/ml)"))) 
   ) %>% kable(format = 'pandoc')
 } else {
-  print("PFNA is not the chemical of interest; this analysis is irrelevant to PFNA_TYPE.")
+  print(sprintf("PFNA is not the chemical of interest; this analysis is not needed for %s.", pfas_type))
 }
 ```
 
