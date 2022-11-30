@@ -1,5 +1,5 @@
 ---
-title: "PFAS Meta-Analysis"
+title: "PFAS Developmental Meta-Analysis"
 author: "Alexandra Larsen"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output:  
@@ -49,7 +49,7 @@ attach(betas)
 
 # Background
 
-The purpose of this analysis is to investigate the relationship between PFAS exposure during pregnancy and birth weight. Meta-analytic techniques were used to summarize epidemiological findings from `r length(Study)` studies.
+The purpose of this analysis is to investigate the relationship between `r pfas_type` exposure during pregnancy and birth weight. Meta-analytic techniques were used to summarize epidemiological findings from `r length(Study)` studies.
 
 # Overall Meta-Analysis
 
