@@ -16,6 +16,7 @@ params:
 <!-- TODO: link main.Rmd to README.md -->
 <!-- TODO: hard code some sanity checks, like the number of papers in each group -->
 <!-- TODO: make sure when updating supp table, to note which info comes from email communications -->
+<!-- TODO: consider adding comparison numbers to the SA so you don't have to look thru the doc -->
 
 ```{r setup, include = FALSE, root.dir = "C:/Users/alarsen/OneDrive - Environmental Protection Agency (EPA)/Projects/IRIS/PFAS/pfas-birthweight-meta-analysis"}
 knitr::opts_chunk$set(echo = params$print_code,
@@ -55,7 +56,7 @@ The purpose of this analysis is to investigate the relationship between PFAS exp
 A random effects model was used to estimate the pooled effect of `r pfas_type` exposure on birth weight, capturing any between-study heterogeneity. The model employs weighted estimation with inverse-variance weights.
 
 ```{r}
-rma_overall <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, slab = Study)
+rma_overall <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = betas)
 print_results("Overall", rma_overall, betas) %>% kable(format = 'pandoc')
 ```
 
@@ -66,6 +67,8 @@ plot_df <- betas %>%
                                    `Pre-Conception` = "PC"),
          Confidence = factor(Confidence, levels = c("High", "Medium", "Low")))
 levels(plot_df$SampleTiming) <- c("Pre-Conception", "1st", "1st-2nd", "2nd-3rd", "3rd", "Birth", "Post-Birth")
+
+# TODO manipulate column positions and rename Timing to `Sample Timing`
 forest(rma_overall,
        cex = .55,
        level = 95,
@@ -287,8 +290,34 @@ nat_results <- rbind(
 nat_results %>% kable(format = 'pandoc')
 ```
 
-# Chemical-Specific Sensitivity Analyses
+## Additional Sensitivity Analyses
 
-This section includes sensitivity analyses appropriate for the collection of `r pfas_type` studies only. 
+For PFNA, sensitivity testing was required regarding the study, Kwon, 2016, which did not report the log base of their estimates. Firstly, the medium confidence strata is examined for sensitively to including Kwon. Estimates are provided below.
+
+```{r}
+if (pfas_type == "PFNA") {
+  # TODO rma with data subset to medium strata, Kwon dropped.
+} else {
+  print("PFNA is not the chemical of interest; this analysis is irrelevant to PFNA_TYPE.")
+}
+```
+
+Additionally, sensitivity was explored with regards to different log bases of the Kwon, 2016 study. Estimates are provided below. 
+
+```{r}
+if (pfas_type == "PFNA") {
+  betas_kwon <- read.csv("betas_pfna_kwon_options.csv")
+  rma_kwon <- list(log_e = rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = betas_kwon %>% filter(!(Study == "Kwon, 2016" & BetaUnit != "g/ln(ng/ml)"))),
+                 log_2 = rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = betas_kwon %>% filter(!(Study == "Kwon, 2016" & BetaUnit != "g/log2(ng/ml)"))),
+                 log_10 = rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = betas_kwon %>% filter(!(Study == "Kwon, 2016" & BetaUnit != "g/log10(ng/ml)"))))
+  rbind(
+    print_results("log_e", rma_kwon[[1]], betas_kwon %>% filter(!(Study == "Kwon, 2016" & BetaUnit != "g/ln(ng/ml)"))),
+    print_results("log_2", rma_loo[[2]], betas_kwon %>% filter(!(Study == "Kwon, 2016" & BetaUnit != "g/log2(ng/ml)"))),
+    print_results("log_10", rma_loo[[3]], betas_kwon %>% filter(!(Study == "Kwon, 2016" & BetaUnit != "g/log10(ng/ml)"))) 
+  ) %>% kable(format = 'pandoc')
+} else {
+  print("PFNA is not the chemical of interest; this analysis is irrelevant to PFNA_TYPE.")
+}
+```
 
  
