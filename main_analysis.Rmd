@@ -62,11 +62,9 @@ print_results("Overall", rma_overall, betas) %>% kable(format = 'pandoc')
 
 ```{r forest_plot, dev = "png", dpi = 350, fig.width = 7, fit.height = 5}
 plot_df <- betas %>%
-  mutate(SampleTiming = fct_recode(Bin, `1st` = "T1", `1st-2nd` = "T1-T2",
-                                   `2nd-3rd` = "T2-T3", `3rd` = "T3", `Birth` = "B", `Post-Birth` = "PB",
-                                   `Pre-Conception` = "PC"),
+  mutate(SampleTiming = factor(fct_recode(Bin, `1st` = "T1", `1st-2nd` = "T1-T2", `2nd-3rd` = "T2-T3", `3rd` = "T3", `Birth` = "B", `Post-Birth` = "PB", `Pre-Conception` = "PC"), levels = c("Pre-Conception", "1st", "1st-2nd", "2nd-3rd", "3rd", "Birth", "Post-Birth")),
          Confidence = factor(Confidence, levels = c("High", "Medium", "Low")))
-levels(plot_df$SampleTiming) <- c("Pre-Conception", "1st", "1st-2nd", "2nd-3rd", "3rd", "Birth", "Post-Birth")
+#levels(plot_df$SampleTiming) <- c("Pre-Conception", "1st", "1st-2nd", "2nd-3rd", "3rd", "Birth", "Post-Birth")
 
 # TODO manipulate column positions and rename Timing to `Sample Timing`
 forest(rma_overall,
