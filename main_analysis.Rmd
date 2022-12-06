@@ -257,6 +257,17 @@ p <- round(rma_sampling2$QMp, 4)
 
 Results from the hypothesis test for any differences between "early" and "late+post" strata: p = `r p`.
 
+## Log-based studies only
+
+This analysis examines the sensitivity of the overall pooled estimate to using only the `r length(which(BetaUnit %in% c("g/2SD ln(ng/ml)", "g/ln(ng/ml)", "g/log10(ng/ml)", "g/log2(ng/ml)", "g/SD ln(1+ng/ml)", "g/SD ln(ng/ml)")))` log-based studies, excluding those needed re-expression, i.e., `r Study[which(!(BetaUnit %in% c("g/2SD ln(ng/ml)", "g/ln(ng/ml)", "g/log10(ng/ml)", "g/log2(ng/ml)", "g/SD ln(1+ng/ml)", "g/SD ln(ng/ml)")))]`.
+
+```{r}
+rma_log <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = betas, subset = BetaUnit %in% c("g/2SD ln(ng/ml)", "g/ln(ng/ml)", "g/log10(ng/ml)", "g/log2(ng/ml)", "g/SD ln(1+ng/ml)", "g/SD ln(ng/ml)"))
+```
+```{r}
+print_results("Overall", rma_log, betas %>% filter(BetaUnit %in% c("g/2SD ln(ng/ml)", "g/ln(ng/ml)", "g/log10(ng/ml)", "g/log2(ng/ml)", "g/SD ln(1+ng/ml)", "g/SD ln(ng/ml)"))) %>% kable(format = 'pandoc')
+```
+
 ## Re-expression to Natural Scale
 
 In this section, each model is re-run using data re-expressed to the natural scale as a sensitivity test to the findings on the log-scale.
