@@ -213,7 +213,7 @@ Results from the hypothesis test for any differences across strata: p = `r p`.
 rma_ga <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, mods = ~ GA, data = betas)
 ```
 
-To further examine the impact of sampling on the relationship between `r pfas_type` and birth weight, a continuous approach for the analysis of sample timing is employed. A meta-regression on a measure of centrality of sample timing is carried out and a pooled effect is presented. Measures of centrality include mean, median, range midpoints, weighted mean of means/medians/midpoints and exact numbers. The results estimate that the effect of `r pfas_type` on birth weight changes by `r round(coef(rma_ga)["GA"], 4)` g per unit increase in the measure of centrality of gestational age at sample timing (95% CI: `r round(summary(rma_ga)$ci.lb[1], 2)`, `r round(summary(rma_ga)$ci.ub[1], 2)`).
+To further examine the impact of sampling on the relationship between `r pfas_type` and birth weight, a continuous approach for the analysis of sample timing is employed. A meta-regression on a measure of centrality of sample timing is carried out and a pooled effect is presented. Measures of centrality include mean, median, range midpoints, weighted mean of means/medians/midpoints and exact numbers. The results estimate that the effect of `r pfas_type` on birth weight changes by `r round(coef(rma_ga)["GA"], 4)` g per unit increase in the measure of centrality of gestational age at sample timing (95% CI: `r round(rma_ga$ci.lb[2], 2)`, `r round(rma_ga$ci.ub[2], 2)`).
 
 # Sensitivity Analyses
 
