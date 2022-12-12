@@ -340,8 +340,8 @@ Additionally, sensitivity was explored with regards to different log bases of th
 if (pfas_type == "PFNA") {
   rbind(
     print_results("log_e", rma_kwon[[1]], betas_kwon %>% filter(!(Study == "Kwon, 2016" & BetaUnit != "g/ln(ng/ml)"))),
-    print_results("log_2", rma_loo[[2]], betas_kwon %>% filter(!(Study == "Kwon, 2016" & BetaUnit != "g/log2(ng/ml)"))),
-    print_results("log_10", rma_loo[[3]], betas_kwon %>% filter(!(Study == "Kwon, 2016" & BetaUnit != "g/log10(ng/ml)"))) 
+    print_results("log_2", rma_kwon[[2]], betas_kwon %>% filter(!(Study == "Kwon, 2016" & BetaUnit != "g/log2(ng/ml)"))),
+    print_results("log_10", rma_kwon[[3]], betas_kwon %>% filter(!(Study == "Kwon, 2016" & BetaUnit != "g/log10(ng/ml)"))) 
   ) %>% kable(format = 'pandoc')
 } else {
   print(sprintf("PFNA is not the chemical of interest; this analysis is not needed for %s.", pfas_type))
