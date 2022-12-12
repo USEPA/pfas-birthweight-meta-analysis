@@ -17,6 +17,7 @@ params:
 <!-- TODO: hard code some sanity checks, like the number of papers in each group -->
 <!-- TODO: make sure when updating supp table, to note which info comes from email communications -->
 <!-- TODO: consider adding comparison numbers to the SA so you don't have to look thru the doc -->
+<!-- TODO: create Med+High variable in data pre-processing -->
 
 ```{r setup, include = FALSE, root.dir = "C:/Users/alarsen/OneDrive - Environmental Protection Agency (EPA)/Projects/IRIS/PFAS/pfas-birthweight-meta-analysis"}
 knitr::opts_chunk$set(echo = params$print_code,
@@ -129,6 +130,7 @@ In this section, the studies are examined by confidence levels - low, medium, hi
 # Add an confidence variable with a high and medium confidence combined
 betas <- betas %>% 
   mutate(Confidence2 = factor(ifelse(Confidence == "Low", "Low", "High+Medium"), levels = c("High+Medium", "Low")))
+attach(betas)
 ```
 ```{r}
 # Run meta-analysis for each study confidence subgroup using a random effects model
@@ -220,6 +222,7 @@ To further examine the impact of sampling on the relationship between `r pfas_ty
 ```{r}
 study_nm <- loo$Study[ind]
 study_confidence <- Confidence[Study == study_nm]
+study_confidence2 <- Confidence2[Study == study_nm]
 study_sampling <- Sampling_3[Study == study_nm]
 ```
 
@@ -228,11 +231,13 @@ In this section, the robustness of the overall, confidence and sampling timing m
 ```{r}
 rma_loo <- list(overall = rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = betas %>% filter(Study != study_nm)),
                 confidence = rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = betas %>% filter(Study != study_nm), subset = Confidence == study_confidence),
+                confidence2 = rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = betas %>% filter(Study != study_nm), subset = Confidence2 == study_confidence2),
                 sampling = rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = betas %>% filter(Study != study_nm), subset = Sampling_3 == study_sampling))
 rbind(
   print_results("Overall", rma_loo[[1]], betas %>% filter(Study != study_nm)),
   print_results(study_confidence, rma_loo[[2]], betas %>% filter(Study != study_nm) %>% filter(Confidence == study_confidence)),
-  print_results(study_sampling, rma_loo[[3]], betas %>% filter(Study != study_nm) %>% filter(Sampling_3 == study_sampling)) 
+  print_results(study_confidence2, rma_loo[[3]], betas %>% filter(Study != study_nm) %>% filter(Confidence2 == study_confidence2)),
+  print_results(study_sampling, rma_loo[[4]], betas %>% filter(Study != study_nm) %>% filter(Sampling_3 == study_sampling)) 
 ) %>% kable(format = 'pandoc')
 ```
 

@@ -11,7 +11,7 @@
 
 <meta name="author" content="Alexandra Larsen" />
 
-<meta name="date" content="2022-12-08" />
+<meta name="date" content="2022-12-12" />
 
 <title>PFAS Developmental Meta-Analysis</title>
 
@@ -413,7 +413,7 @@ summary {
 
 <h1 class="title toc-ignore">PFAS Developmental Meta-Analysis</h1>
 <h4 class="author">Alexandra Larsen</h4>
-<h4 class="date">December 08, 2022</h4>
+<h4 class="date">December 12, 2022</h4>
 
 </div>
 
@@ -445,6 +445,7 @@ summary {
 <!-- TODO: hard code some sanity checks, like the number of papers in each group -->
 <!-- TODO: make sure when updating supp table, to note which info comes from email communications -->
 <!-- TODO: consider adding comparison numbers to the SA so you don't have to look thru the doc -->
+<!-- TODO: create Med+High variable in data pre-processing -->
 <div id="background" class="section level1">
 <h1><span class="header-section-number">1</span> Background</h1>
 <p>The purpose of this analysis is to investigate the relationship between PFNA exposure during pregnancy and birth weight. Meta-analytic techniques were used to summarize epidemiological findings from 27 studies.</p>
@@ -895,6 +896,12 @@ summary {
 <div id="study-confidence" class="section level2">
 <h2><span class="header-section-number">3.1</span> Study Confidence</h2>
 <p>In this section, the studies are examined by confidence levels - low, medium, high, or medium and high combined. Pooled effects are calculated and statistical differences across strata are considered.</p>
+<pre><code>## The following objects are masked from betas (pos = 3):
+## 
+##     BetaLnNgml, BetaLnNgmlLCL, BetaLnNgmlSE, BetaLnNgmlUCL, BetaNgml,
+##     BetaNgmlLCL, BetaNgmlSE, BetaNgmlUCL, BetaOrig, BetaOrigLCL,
+##     BetaOrigUCL, BetaUnit, Bin, Confidence, GA, Population,
+##     Sample.Size, Sampling_1, Sampling_2, Sampling_3, Study</code></pre>
 <table>
 <thead>
 <tr class="header">
@@ -1071,6 +1078,17 @@ summary {
 <td align="right">0.71</td>
 </tr>
 <tr class="odd">
+<td align="left">High+Medium</td>
+<td align="right">21</td>
+<td align="right">-36.5</td>
+<td align="right">7.3</td>
+<td align="right">-50.9</td>
+<td align="right">-22.1</td>
+<td align="right">0</td>
+<td align="right">27.03</td>
+<td align="right">0.16</td>
+</tr>
+<tr class="even">
 <td align="left">post</td>
 <td align="right">5</td>
 <td align="right">-64.5</td>
@@ -1383,13 +1401,13 @@ summary {
 <tr class="odd">
 <td align="left">log_10</td>
 <td align="right">27</td>
-<td align="right">-64.5</td>
-<td align="right">17.9</td>
-<td align="right">-99.5</td>
-<td align="right">-29.5</td>
+<td align="right">-36.5</td>
+<td align="right">7.3</td>
+<td align="right">-50.9</td>
+<td align="right">-22.1</td>
 <td align="right">0</td>
-<td align="right">0.00</td>
-<td align="right">0.36</td>
+<td align="right">27.03</td>
+<td align="right">0.16</td>
 </tr>
 </tbody>
 </table>
