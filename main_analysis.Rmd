@@ -2,14 +2,14 @@
 title: "PFAS Developmental Meta-Analysis"
 author: "Alexandra Larsen"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
-output:  
+output:
   html_document:
     toc: yes
     toc_depth: 2
     number_sections: yes
 params:
-  pfas_type: "PFNA"
-  print_code: FALSE
+  pfas_type: PFNA
+  print_code: no
 ---
 
 <!-- Manuscript: overall, stratified, loo; sensitivity: re-expression, Kwon (PFNA only), 2 vs 3 strata, loo -->
@@ -26,16 +26,13 @@ knitr::opts_chunk$set(echo = params$print_code,
 #rmarkdown::render(output_file = paste0("Meta_Analysis_", pfas, ".pdf"))
 
 library(readxl)
-library(tidyr)
 library(tidyverse)
-library(dplyr)
 library(metafor)
 library(meta)
 library(knitr)
 library(kableExtra)
-library(ggplot2)
 library(RColorBrewer)
-library(formatR)
+library(ggthemes)
 source("utility_functions.R")
 
 pfas_type = "PFNA"
@@ -126,12 +123,6 @@ In addition to the overall meta-analysis, the studies are also examined accordin
 
 In this section, the studies are examined by confidence levels - low, medium, high, or medium and high combined. Pooled effects are calculated and statistical differences across strata are considered. 
 
-```{r}
-# Add an confidence variable with a high and medium confidence combined
-betas <- betas %>% 
-  mutate(Confidence2 = factor(ifelse(Confidence == "Low", "Low", "High+Medium"), levels = c("High+Medium", "Low")))
-attach(betas)
-```
 ```{r}
 # Run meta-analysis for each study confidence subgroup using a random effects model
 rma_high <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = betas, subset = Confidence == "High")
@@ -347,5 +338,3 @@ if (pfas_type == "PFNA") {
   print(sprintf("PFNA is not the chemical of interest; this analysis is not needed for %s.", pfas_type))
 }
 ```
-
- 

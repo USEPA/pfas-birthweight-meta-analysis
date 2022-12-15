@@ -17,7 +17,8 @@ print_results <- function(model_nm, out, dat, dig1 = 1, dig2 = 2) {
                   I2 = I2, 
                   Q_PVal = QEp)) %>% 
     mutate_at(c(3:6), ~round(., dig1)) %>%
-    mutate_at(c(7:9), ~round(., dig2))
+    mutate_at(c(7:9), ~round(., dig2)) %>%
+    remove_rownames()
 }
 
 modify_label <- function(out, lab) {
