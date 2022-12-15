@@ -338,3 +338,38 @@ if (pfas_type == "PFNA") {
   print(sprintf("PFNA is not the chemical of interest; this analysis is not needed for %s.", pfas_type))
 }
 ```
+
+# Supplemental
+
+## Figure for pooled effect estimates
+
+```{r}
+rma_results <- rbind(
+  print_results("All", rma_overall, betas),
+  print_results("High", rma_high, betas %>% filter(Confidence == "High")),
+  print_results("Medium", rma_med, betas %>% filter(Confidence == "Medium")),
+  print_results("Low", rma_low, betas %>% filter(Confidence == "Low")),
+  print_results("High+Medium", rma_hm, betas %>% filter(Confidence2 == "High+Medium")),
+  print_results("Early", rma_early, betas %>% filter(Sampling_3 == "early")),
+  print_results("Mid/Late", rma_late, betas %>% filter(Sampling_3 == "late")),
+  print_results("Post", rma_post, betas %>% filter(Sampling_3 == "post")),
+  print_results("Mid/Late+Post", rma_lp, betas %>% filter(Sampling_2 == "late"))
+)
+
+#rma_results %>% kable(format = 'pandoc')
+
+plot_df <- rma_results %>%
+  mutate(Type = factor(c("All Studies", "Study Confidence", "Study Confidence", "Study Confidence", "Study Confidence", "Sample Timing", "Sample Timing", "Sample Timing", "Sample Timing"), levels = c("All Studies", "Study Confidence", "Sample Timing")),
+         Model = factor(Model, levels = c("All", "High", "Medium", "Low", "High+Medium", "Early",
+                                          "Mid/Late", "Post", "Mid/Late+Post"))) %>%
+  filter(!(Model %in% c("High+Medium", "Mid/Late+Post")))
+
+ggplot(data = plot_df) +
+  geom_pointrange(aes(x = Model, y = Estimate, ymin = LCL, ymax = UCL, color = Type)) +
+  ylab("Pooled Effect Estimate and 95% CI ") +
+  theme_minimal() +
+  scale_colour_colorblind() +
+  theme(legend.title = element_blank(),
+        axis.text.x = element_text(angle = 45, vjust = 0.5),
+        axis.title.x = element_blank())
+```
