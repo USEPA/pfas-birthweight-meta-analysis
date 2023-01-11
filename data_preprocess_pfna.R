@@ -100,3 +100,4 @@ betas_kwon <- betas_kwon %>%
   bind_rows(read.csv("betas_pfna.csv"))
 
 write.csv(betas_kwon, "betas_pfna_kwon_options.csv")
+

@@ -306,6 +306,8 @@ nat_results %>% kable(format = 'pandoc')
 
 ## Additional Sensitivity Analyses
 
+### Kwon, 2016
+
 For PFNA, sensitivity testing was required regarding the study, Kwon, 2016, which did not report the log base of their estimates. Firstly, the medium confidence strata is examined for sensitively to including Kwon. Estimates are provided below.
 
 ```{r}
@@ -338,6 +340,29 @@ if (pfas_type == "PFNA") {
   print(sprintf("PFNA is not the chemical of interest; this analysis is not needed for %s.", pfas_type))
 }
 ```
+
+### High confidence stratified analysis
+
+```{r}
+rma_high_early <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = betas, subset = Confidence == "High" & Sampling_3 == "early")
+rma_high_late <- rma(yi = BetaLnNgml, sei = BetaLnNgmlSE, data = betas, subset = Confidence == "High" & Sampling_3 == "late")
+
+# there aren't any values in the post category; so late = late+post (include as footnote)
+```
+```{r echo = F, include = T}
+rbind(
+  print_results("Early", rma_high_early, betas %>% filter(Confidence == "High" & Sampling_3 == "early")),
+  print_results("Late", rma_high_late, betas %>% filter(Confidence == "High" & Sampling_3 == "late"))) %>% kable(format = "pandoc")
+```
+```{r echo = F, echo = F, include = F}
+high_sampling_results <- data.frame(estimate = c(coef(rma_high_early), coef(rma_high_late)),
+                               SE = c(rma_high_early$se, rma_high_late$se),
+                               strata = c("Early", "Late"),
+                               tau2 = round(c(rma_high_early$tau2, rma_high_late$tau2), 3))
+rma_high_sampling <- rma(estimate, sei = SE, mods = ~ strata, method = "FE", data = high_sampling_results)
+```
+
+Results from the hypothesis test for any differences across strata: p = `r round(rma_high_sampling$QMp, 4)`.
 
 # Supplemental
 
